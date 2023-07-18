@@ -8,7 +8,7 @@ import Pizzas from './assets/pizzas.json';
 
 import './scss/app.scss';
 
-console.log(Pizzas);
+
 
 function App() {
 	return (
@@ -23,7 +23,7 @@ function App() {
 					<h2 className="content__title">Все пиццы</h2>
 					<div className="content__items">
 						{Pizzas.map((obj) => (
-							<PizzaBlock {...obj} />
+							<PizzaBlock key={obj.id} {...obj} />
 						))}
 					</div>
 				</div>
