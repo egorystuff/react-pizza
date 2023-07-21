@@ -21,6 +21,10 @@ body {
 
 	&__title {
 		margin: 35px 0;
+
+		@media (max-width: 1400px) {
+			text-align: center;
+		}
 	}
 
 	&__items {
@@ -53,8 +57,18 @@ body {
 			.categories {
 				margin-bottom: 30px;
 
-				@media (max-width: 1100px) {
-					width: 500px;
+				@media (max-width: 1000px) {
+					ul {
+						display: grid;
+						grid-template-columns: repeat(3, 1fr);
+					}
+				}
+
+				@media (max-width: 700px) {
+					ul {
+						display: grid;
+						grid-template-columns: repeat(2, 1fr);
+					}
 				}
 			}
 		}
@@ -128,6 +142,10 @@ body {
 				color: darken($color: #b6b6b6, $amount: 50);
 			}
 		}
+	}
+
+	.content__items {
+		display: block;
 	}
 
 	&__item {
