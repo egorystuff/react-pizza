@@ -4,21 +4,24 @@ import Categories from '../components/Categories';
 import Sort from '../components/Sort';
 import Block from '../components/PizzaBlock/Block';
 import Skeleton from '../components/PizzaBlock/Skeleton';
+import Pagination from '../components/Pagination/Pagination';
 
 const Home = ({ searchValue }) => {
 	const [items, setItems] = useState([]);
 	const [isloading, setIsloading] = useState(true);
 	const [categoryId, setCategoryId] = useState(0);
+	const [currentPage, setCurrentPage] = useState(1);
 	const [sortType, setSortType] = useState({ name: 'популярности(убывание)', sortProperty: 'rating' });
 
 	const order = sortType.sortProperty.includes('-') ? 'asr' : 'desc';
-	const sortBy = sortType.sortProperty;
+	const sortBy = sortType.sortProperty.replace('-', '');
 	const category = categoryId > 0 ? `category=${categoryId}` : '';
+	const search = searchValue ? `&search=${searchValue}` : '';
 
 	useEffect(() => {
 		setIsloading(true);
 		fetch(
-			`https://64b69a6fdf0839c97e15d9be.mockapi.io/items?${category}&sortBy=${sortBy.replace('-', '')}&order=${order}`
+			`https://64b69a6fdf0839c97e15d9be.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`
 		)
 			.then((res) => res.json())
 			.then((arr) => {
@@ -26,7 +29,7 @@ const Home = ({ searchValue }) => {
 				setIsloading(false);
 			});
 		window.scrollTo(0, 0);
-	}, [categoryId, sortType]);
+	}, [categoryId, sortType, searchValue, currentPage]);
 
 	const pizzas = items.map((obj) => <Block key={obj.id} {...obj} />);
 	const skeletons = [...new Array(6)].map((_, index) => <Skeleton key={index} />);
@@ -39,8 +42,18 @@ const Home = ({ searchValue }) => {
 			</div>
 			<h2 className="content__title">Все пиццы</h2>
 			<div className="content__items">{isloading ? skeletons : pizzas}</div>
+			<Pagination onChangePage={(number) => setCurrentPage(number)} />
 		</div>
 	);
 };
 
 export default Home;
+
+// поиск по статичному массиву методом фильтровки items перед рендером
+
+// .filter((obj) => {
+// 	if (obj.title.toLowerCase().includes(searchValue.toLowerCase())) {
+// 		return true;
+// 	}
+// 	return false;
+// })
