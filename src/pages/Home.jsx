@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useSelector } from 'react-redux';
 
 import Categories from '../components/Categories';
 import Sort from '../components/Sort';
@@ -8,20 +9,23 @@ import Pagination from '../components/Pagination/Pagination';
 import { SearchContext } from '../App';
 
 const Home = () => {
+	const categoryId = useSelector((state) => state.filterSlice.categoryId);
+
 	const { searchValue } = useContext(SearchContext);
 	const [items, setItems] = useState([]);
 	const [isloading, setIsloading] = useState(true);
-	const [categoryId, setCategoryId] = useState(0);
+	// const [categoryId, setCategoryId] = useState(0);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [sortType, setSortType] = useState({ name: 'популярности(убывание)', sortProperty: 'rating' });
 
-	const order = sortType.sortProperty.includes('-') ? 'asr' : 'desc';
-	const sortBy = sortType.sortProperty.replace('-', '');
-	const category = categoryId > 0 ? `category=${categoryId}` : '';
-	const search = searchValue ? `&search=${searchValue}` : '';
-
 	useEffect(() => {
 		setIsloading(true);
+
+		const order = sortType.sortProperty.includes('-') ? 'asr' : 'desc';
+		const sortBy = sortType.sortProperty.replace('-', '');
+		const category = categoryId > 0 ? `category=${categoryId}` : '';
+		const search = searchValue ? `&search=${searchValue}` : '';
+
 		fetch(
 			`https://64b69a6fdf0839c97e15d9be.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`
 		)
