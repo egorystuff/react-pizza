@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { setCategoryId } from '../redux/slices/filterSlice';
 
 import Categories from '../components/Categories';
 import Sort from '../components/Sort';
@@ -9,20 +11,27 @@ import Pagination from '../components/Pagination/Pagination';
 import { SearchContext } from '../App';
 
 const Home = () => {
+	const dispatch = useDispatch();
 	const categoryId = useSelector((state) => state.filterSlice.categoryId);
+	const sortType = useSelector((state) => state.filterSlice.sort.sortProperty);
+
+	// console.log('id category:', categoryId);
 
 	const { searchValue } = useContext(SearchContext);
 	const [items, setItems] = useState([]);
 	const [isloading, setIsloading] = useState(true);
-	// const [categoryId, setCategoryId] = useState(0);
 	const [currentPage, setCurrentPage] = useState(1);
-	const [sortType, setSortType] = useState({ name: 'популярности(убывание)', sortProperty: 'rating' });
+
+	const onChangeCategory = (id) => {
+		// console.log(id);
+		dispatch(setCategoryId(id));
+	};
 
 	useEffect(() => {
 		setIsloading(true);
 
-		const order = sortType.sortProperty.includes('-') ? 'asr' : 'desc';
-		const sortBy = sortType.sortProperty.replace('-', '');
+		const order = sortType.includes('-') ? 'asr' : 'desc';
+		const sortBy = sortType.replace('-', '');
 		const category = categoryId > 0 ? `category=${categoryId}` : '';
 		const search = searchValue ? `&search=${searchValue}` : '';
 
@@ -43,8 +52,8 @@ const Home = () => {
 	return (
 		<div className="container">
 			<div className="content__top">
-				<Categories value={categoryId} onChangeCategory={(index) => setCategoryId(index)} />
-				<Sort value={sortType} onChangeSort={(index) => setSortType(index)} />
+				<Categories value={categoryId} onChangeCategory={onChangeCategory} />
+				<Sort />
 			</div>
 			<h2 className="content__title">Все пиццы</h2>
 			<div className="content__items">{isloading ? skeletons : pizzas}</div>
