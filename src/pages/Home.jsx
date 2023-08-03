@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
 
-import { setCategoryId } from '../redux/slices/filterSlice';
+import { setCategoryId, setCurrentPage } from '../redux/slices/filterSlice';
 
 import Categories from '../components/Categories';
 import Sort from '../components/Sort';
@@ -12,19 +13,23 @@ import { SearchContext } from '../App';
 
 const Home = () => {
 	const dispatch = useDispatch();
+	// const { categoryId, sortType, currentPage } = useSelector((state) => state.filterSlice);
+
 	const categoryId = useSelector((state) => state.filterSlice.categoryId);
 	const sortType = useSelector((state) => state.filterSlice.sort.sortProperty);
-
-	// console.log('id category:', categoryId);
+	const currentPage = useSelector((state) => state.filterSlice.currentPage);
 
 	const { searchValue } = useContext(SearchContext);
 	const [items, setItems] = useState([]);
 	const [isloading, setIsloading] = useState(true);
-	const [currentPage, setCurrentPage] = useState(1);
+	// const [currentPage, setCurrentPage] = useState(1);
 
 	const onChangeCategory = (id) => {
-		// console.log(id);
 		dispatch(setCategoryId(id));
+	};
+
+	const onChangePage = (number) => {
+		dispatch(setCurrentPage(number));
 	};
 
 	useEffect(() => {
@@ -35,14 +40,15 @@ const Home = () => {
 		const category = categoryId > 0 ? `category=${categoryId}` : '';
 		const search = searchValue ? `&search=${searchValue}` : '';
 
-		fetch(
-			`https://64b69a6fdf0839c97e15d9be.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`
-		)
-			.then((res) => res.json())
-			.then((arr) => {
-				setItems(arr);
+		axios
+			.get(
+				`https://64b69a6fdf0839c97e15d9be.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`
+			)
+			.then((res) => {
+				setItems(res.data);
 				setIsloading(false);
 			});
+
 		window.scrollTo(0, 0);
 	}, [categoryId, sortType, searchValue, currentPage]);
 
@@ -57,7 +63,7 @@ const Home = () => {
 			</div>
 			<h2 className="content__title">Все пиццы</h2>
 			<div className="content__items">{isloading ? skeletons : pizzas}</div>
-			<Pagination onChangePage={(number) => setCurrentPage(number)} />
+			<Pagination currentPage={currentPage} onChangePage={onChangePage} />
 		</div>
 	);
 };
