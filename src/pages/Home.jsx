@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
 import qs from 'qs';
 import { useNavigate } from 'react-router-dom';
 
 import { setCategoryId, setCurrentPage, setFilters } from '../redux/slices/filterSlice';
+import { fetchPizzas } from '../redux/slices/pizzaSlice';
 
 import Categories from '../components/Categories';
 import Sort, { list } from '../components/Sort';
@@ -19,6 +19,7 @@ const Home = () => {
 	const isSearch = useRef(false);
 	const isMounted = useRef(false);
 
+	const items = useSelector((state) => state.pizza.items);
 	const { categoryId, sort, currentPage } = useSelector((state) => state.filterSlice);
 
 	// const categoryId = useSelector((state) => state.filterSlice.categoryId);
@@ -26,9 +27,9 @@ const Home = () => {
 	// const currentPage = useSelector((state) => state.filterSlice.currentPage);
 
 	const { searchValue } = useContext(SearchContext);
-	const [items, setItems] = useState([]);
 	const [isloading, setIsloading] = useState(true);
 	// const [currentPage, setCurrentPage] = useState(1);
+	// const [items, setItems] = useState([]);
 
 	// функции
 	const onChangeCategory = (id) => {
@@ -39,7 +40,7 @@ const Home = () => {
 		dispatch(setCurrentPage(number));
 	};
 
-	const fetchPizzas = () => {
+	const getPizzas = async () => {
 		setIsloading(true);
 
 		const order = sort.sortProperty.includes('-') ? 'asr' : 'desc';
@@ -47,14 +48,36 @@ const Home = () => {
 		const category = categoryId > 0 ? `category=${categoryId}` : '';
 		const search = searchValue ? `&search=${searchValue}` : '';
 
-		axios
-			.get(
-				`https://64b69a6fdf0839c97e15d9be.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`
-			)
-			.then((res) => {
-				setItems(res.data);
-				setIsloading(false);
-			});
+		// await axios
+		// 	.get(
+		// 		`https://64b69a6fdf0839c97e15d9be.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`
+		// 	)
+		// 	.then((res) => {
+		// 		setItems(res.data);
+		// 		setIsloading(false);
+		// 		console.log(555555);
+		// 	})
+		// 	.catch((err) => {
+		// 		setIsloading(false);
+		// 	});
+
+		//запрос данных с бэка
+		try {
+			dispatch(
+				fetchPizzas({
+					order,
+					sortBy,
+					category,
+					search,
+					currentPage,
+				})
+			);
+		} catch (error) {
+			console.log('ERROR', error);
+			alert('Ошибка при загрузке');
+		} finally {
+			setIsloading(false);
+		}
 	};
 
 	// Если был первый рендер, то проверяем URL параметры и сохраняем их в Redux
@@ -91,7 +114,7 @@ const Home = () => {
 		window.scrollTo(0, 0);
 
 		if (!isSearch.current) {
-			fetchPizzas();
+			getPizzas();
 		}
 
 		isSearch.current = false;
